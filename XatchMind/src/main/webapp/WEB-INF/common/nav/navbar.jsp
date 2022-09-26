@@ -20,7 +20,7 @@
 			<%}else{ %>	
 			
 			<%=session.getAttribute("id") %>님 환영합니다.&nbsp;	
-			<a href="" class="go_logout">로그아웃</a>
+			<a href="/login.do" class="go_logout">로그아웃</a>
 			<%} %>
 		</div>
 

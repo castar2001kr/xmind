@@ -15,7 +15,7 @@ public class MemberDAO {
 	
 	private MemberDAO() {
 		
-		String url="jdbc:oracle:thin:@localhost:1521/system2";
+		String url="jdbc:oracle:thin:@localhost:1521/system";
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			

@@ -2,3 +2,23 @@
 pageEncoding="UTF-8"%>
 
 <script src="/static/rom/sticker.js"></script>
+<script>
+
+    let btns  = document.querySelectorAll('button');
+
+    let count = 0;
+
+    btns.forEach((btn)=>{
+
+        if(count%2==0){
+            
+            btn.onclick=()=>{location.href="/host";}
+        }else{
+            btn.onclick=()=>{location.href="/client";}
+        }
+
+        count++;
+    })
+  
+
+</script>

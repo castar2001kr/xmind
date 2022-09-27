@@ -1,0 +1,353 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+pageEncoding="UTF-8"%>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방제 : </title>
+
+    <style>
+        div{
+            display: flex;
+            padding-left: 0;
+            
+        }
+
+        .profile{
+            border: red solid 2px;
+            width: 120px;
+            height: 120px;
+            justify-content: center;
+            flex-direction: column;
+            justify-content: center;
+            margin: 30px;
+            
+        }
+
+        .avatar{
+            border: black solid 2px;
+            height: auto;
+            text-align: center;
+            
+        }
+
+        .name{
+            display: inline;
+            text-align: center;
+            border: solid blue 2px;
+        }
+
+        .avatar>img{
+            display: block;
+            width: 100%;
+            height: 90px;
+            
+        }
+
+        .left_people{
+
+            display: flex;
+            flex-direction: column;
+            float: left;
+        }
+        
+        .right_people{
+            float: right;
+            display: flex;
+            flex-direction: column;
+           
+        }
+        
+        .cnv_container{
+
+            border: 2px teal solid;            
+            width: 500px;
+            height: 500px;
+            margin : 30px;
+            flex-direction: column;
+
+        }
+
+        .container{
+            justify-content: center;
+            
+        }
+
+        canvas{
+            border: solid aqua 2px;
+        }
+
+
+
+
+    </style>
+
+
+
+</head>
+<body>
+
+
+    <div class="container">
+
+       
+        <div class="left_people">
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+            </div>
+
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+            </div>
+
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+            </div>
+            
+        </div>
+
+            
+
+           
+
+      
+
+
+        <div class="cnv_container">
+
+            <canvas class="canvas1" width="500" height="500"></canvas>
+
+            <canvas class="canvas2" width="500" height="500"></canvas>
+
+
+        </div>
+
+
+        <div class="right_people">
+            
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+            </div>
+
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+            </div>
+
+            <div class="profile">
+                
+                <div class="avatar"><img src="profile_ex.jpg" alt="아바타 사진"></div>
+                <div class="name">name</div>
+
+
+        </div>
+
+    </div>
+
+    
+</body>
+
+    <script src="jquery.js"></script>
+    <script>
+
+        class Queue {
+        constructor() {
+            this._arr = [];
+        }
+        enqueue(item) {
+            this._arr.push(item);
+        }
+        dequeue() {
+            return this._arr.shift();
+        }
+
+        isempty(){
+            console.log('끝')
+            return this._arr.shift()==undefined;
+        }
+
+        }
+
+
+
+        const w=600;
+        const h=600;
+
+        let f;
+
+        let startdraw=false;
+
+        const buffer=new Queue();
+
+        let before=null;
+        let now=null;
+        
+        let beforeE={};
+
+        const can = document.querySelector('.canvas1');
+        const ctx = can.getContext("2d");
+        
+
+        var pos = can.getBoundingClientRect();
+
+
+        const can2 = document.querySelector('.canvas2');
+        const ctx2 = can2.getContext("2d");
+        let startdraw2 = false;
+
+
+        function getT(){
+            return (new Date()).getMilliseconds();
+        }
+
+        function flush(){
+
+            if(!buffer.isempty()){
+
+                console.log("drawing..")
+
+                temp=buffer.dequeue();
+            
+                try{setTimeout(() => {
+                    
+                    
+                    
+
+                    if(!startdraw2){
+
+                        ctx2.beginPath();
+                        
+                        ctx2.moveTo(temp.start.x,temp.start.y);
+                        ctx2.lineTo(temp.start.x,temp.start.y);
+                        ctx2.lineTo(temp.end.x,temp.end.y);
+                        startdraw2=true;
+                    }
+                    ctx2.lineTo(temp.start.x,temp.start.y);
+                    ctx2.lineTo(temp.end.x,temp.end.y);
+                    ctx2.stroke();
+
+                    console.log(temp)
+
+                    flush();
+
+                }, Math.abs(temp.before-temp.now));}catch(e){
+
+                    console.log("end!")
+                    startdraw2=false;
+                    ctx2.closePath();
+                }
+
+            }else{
+                console.log("end!")
+                startdraw2=false;
+                ctx2.closePath();
+            }
+            
+
+        }
+
+
+        function draw(e){
+
+            //console.log(e.offsetX,e.offsetY); 
+            
+            if(!startdraw){
+
+                before=getT();
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX,e.offsetY);
+                startdraw=true;
+                ctx.lineTo(e.offsetX,e.offsetY);
+                ctx.stroke();
+                now=getT();
+                buffer.enqueue({
+                    start : {t : before, x : e.offsetX, y : e.offsetY},
+                    
+
+                    end : {t : now,  x : e.offsetX, y : e.offsetY}
+
+
+                })
+
+                before=getT();
+                beforeE={offsetX : e.offsetX , offsetY : e.offsetY};
+
+            }else{
+                
+                
+                ctx.lineTo(e.offsetX,e.offsetY);
+                ctx.stroke();
+                now=getT();
+
+                buffer.enqueue({
+                    start : {t : before, x : beforeE.offsetX, y : beforeE.offsetY},
+                    
+
+                    end : {t : now, x : e.offsetX, y : e.offsetY}
+
+
+                })
+
+                before=getT();
+                beforeE={offsetX : e.offsetX , offsetY : e.offsetY};
+            }
+
+            
+            
+            
+            
+        }  
+
+        $(".canvas1").on("mousedown",(e)=>{
+
+           
+            console.log(e.offsetX,e.offsetY);  
+            ctx.fillRect(e.offsetX,e.offsetY,2,2);
+            f=draw;
+            
+
+        })
+
+        $(".canvas1").on("mousemove",(e)=>{
+
+            if(f!=null)
+            f(e);
+
+        })
+
+        $(".canvas1").on("mouseup",()=>{
+
+            startdraw=false;
+            f=null;
+            console.log(buffer);
+            flush();
+        
+        })
+
+
+
+        
+        
+
+
+
+
+
+
+
+    </script>
+
+</html>

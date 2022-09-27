@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,24 +23,29 @@ import org.json.simple.parser.ParseException;
 
 
 
-@ServerEndpoint("/game.io.host")
+@ServerEndpoint("/game.io")
 public class SocketServer {
 
-	private static List<Session> sessionUsers = Collections.synchronizedList(new ArrayList<>());
+	private static List<Session> hosts = Collections.synchronizedList(new ArrayList<>());
+	private static List<Session> clients = Collections.synchronizedList(new ArrayList<>());
+	
+	
+	private static HashMap<Session,Boolean> ClientMap = new HashMap<>();
+	private static HashMap<Session,Boolean> HostMap = new HashMap<>();
+	
 	private static HashMap<Session,Boolean> sessionMap = new HashMap<>();
+	
+	private static int count = 0;
 	
 	@OnOpen
 	public void handleOpen(Session userSession) {
-		
-		
-		sessionUsers.add(userSession);
-		sessionMap.put(userSession, true);
 		
 		System.out.println("새로운 유저 접속");
 	}
 	
 	@OnMessage
-	public void handleMessage(String message) {
+	public void handleMessage(String message, Session userSession) {
+		
 		
 		JSONParser parser = new JSONParser();
 		
@@ -48,20 +54,43 @@ public class SocketServer {
 			
 			JSONObject hostsig = (JSONObject) obj.get("header");
 			
+			System.out.println(obj.get("header"));
+			
 			if(((Long)(hostsig.get("host")))==1) {
 				
+				System.out.println("호스트 메시지 전달받음.");
 				
-				Iterator<Session> iter = sessionUsers.iterator();
+				Iterator<Session> iter = clients.iterator();
 				
+				
+					
 				while(iter.hasNext()) {
 					
 					Session s = iter.next();
 					
-					if(sessionMap.get(s))
-					s.getAsyncRemote().sendText(message);
+					if(ClientMap.get(s))
+					s.getBasicRemote().sendText(message);
 					
 				}
+					
+					
 				
+				
+				userSession.getAsyncRemote().sendText("call이다.");
+				
+				
+				
+				
+				
+			}else {
+				
+				
+				if(((Long)(hostsig.get("host")))==0) {
+					
+					
+					ClientMap.put(userSession, true);
+					clients.add(userSession);
+				}
 			}
 			
 			
@@ -71,7 +100,7 @@ public class SocketServer {
 			
 		
 			
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("오류...");
 		}
